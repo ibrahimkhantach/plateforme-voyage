@@ -57,13 +57,15 @@ public function store(Request $request): RedirectResponse
     event(new Registered($user));
     Auth::login($user);
 
-    if($user->role === 'admin'){
-        return redirect()->intended(route('dashboard', absolute: false));
-    
+    if ($user->role === 'admin') {
+        // If Admin, go to Dashboard
+        return redirect()->route('dashboard');
+    } 
 
-    } elseif($user->role==='user'){
-        return redirect()->intended(route('/', absolute: false));
-    }
+    // 2. If User, go to Home (root URL)
+    // We use redirect('/') instead of route('/')
+    return redirect('/');
+    
 
 
 }

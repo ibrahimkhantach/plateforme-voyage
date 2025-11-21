@@ -1,11 +1,10 @@
+<x-app-layout>
 <section class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
     <!-- Top Navigation Spacing -->
     <div class="h-20"></div>
 
     <div class="container mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <x-side-bar/>
-
             <!-- Main Content -->
             <div class="lg:col-span-3">
                 
@@ -13,8 +12,7 @@
                 <div class="mb-8 text-center lg:text-left">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Adventures</h1>
-                            <p class="mt-2 text-gray-700 dark:text-gray-300">Discover amazing adventures from our community</p>
+                            <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Mon Adventures</h1>
                         </div>
                         
                         <!-- Add Adventure Button -->
@@ -60,7 +58,7 @@
                                     </small>
                                 </div>
                             </div>
-                            @if(auth()->check() && auth()->id() === $adventure->user_id)
+                         @if(auth()->check() && auth()->id() === $adventure->user_id)
                             <div class="flex gap-2">
                                 <a href="{{ route('aventure.edit', $adventure) }}" class="p-2 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,3 +182,4 @@
         </div>
     </div>
 </section>
+</x-app-layout>

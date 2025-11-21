@@ -26,7 +26,10 @@
         </header>
         <main>
 
-        <x-aventure.all-aventure :aventures="$aventures" />
+            
+
+            
+            <x-aventure.all-aventure :aventures="$aventures" />
             
         </main>
         
