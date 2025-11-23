@@ -1,11 +1,6 @@
 @props(['destinations'])
 
-<section class="py-8">
-    <div class="flex justify-between items-end mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-            Destinations Populaires
-        </h2>
-    </div>
+<div class="py-8">
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @foreach($destinations as $dest)
@@ -38,4 +33,4 @@
             </a>
         @endforeach
     </div>
-</section>
+</div>

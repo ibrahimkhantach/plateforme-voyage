@@ -15,7 +15,7 @@ class Adventure extends Model
         'destination',
         'details',
         'images',
-        'idUser'
+        'user_id'
         ];
 
          public function user(){

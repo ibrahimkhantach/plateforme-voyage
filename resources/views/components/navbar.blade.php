@@ -1,12 +1,12 @@
-<nav class="bg-white shadow-lg dark:bg-gray-900 dark:text-white transition-colors duration-200 fixed w-full z-50">
+<nav class="bg-white shadow-lg dark:bg-gray-900 dark:text-white transition-colors duration-200 fixed w-full z-50 h-17">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       
       <!-- Logo -->
       <div class="flex-shrink-0">
         <a href="/" class="flex items-center">
-            <img src="{{ asset('storage/logo/logo.png') }}" class="ml-2 h-[50px] w-[50px] group-hover:rotate-180 transition-transform"   />
-          <span class="ml-2 text-xl font-bold text-gray-800 dark:text-white">Horizons Infinis</span>
+          <x-application-logo/>
+            <span class="ml-2 text-xl font-bold text-gray-800 dark:text-white">Horizons Infinis</span>
         </a>
       </div>
 
