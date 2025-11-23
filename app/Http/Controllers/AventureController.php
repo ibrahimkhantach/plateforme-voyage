@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Adventure;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Str; // To clean the filename
 
 
 class AventureController extends Controller
@@ -17,7 +20,7 @@ class AventureController extends Controller
      */
     public function index()
     {
-        $aventures = Adventure::with('user')->paginate(10);
+        $aventures = Adventure::with('user')->orderBy("created_at","desc")->paginate(10);
         return view("welcome", compact('aventures'));
     }
 
@@ -51,7 +54,7 @@ class AventureController extends Controller
             "destination" => $request->destination,
             "details" => $request->details,
             "images" => $folderName,
-            "idUser" => $userId
+            "user_id" => $userId
         ]);
 
         // Uploader les images
@@ -76,8 +79,6 @@ class AventureController extends Controller
     {
         $adventure = Adventure::findOrFail($id);
         
-        // Vérifier que l'utilisateur est propriétaire
-        $this->authorize('update', $adventure);
         
         return view("aventures.edit", compact('adventure'));
     }
@@ -89,8 +90,13 @@ class AventureController extends Controller
     {
         $adventure = Adventure::findOrFail($id);
         
-        // Vérifier que l'utilisateur est propriétaire
-        $this->authorize('update', $adventure);
+        $images = $request->delete_images;
+        //delete images :
+        foreach ($images as $image) {
+            if(Storage::disk("public")->exists($image)){
+                Storage::disk("public")->delete($image);
+            }
+        }
 
         $request->validate([
             "title" => "required|string|max:255",
@@ -123,8 +129,6 @@ class AventureController extends Controller
     {
         $adventure = Adventure::findOrFail($id);
         
-        // Vérifier que l'utilisateur est propriétaire
-        $this->authorize('delete', $adventure);
 
         // Supprimer le dossier et les images
         if (Storage::disk('public')->exists($adventure->images)) {
@@ -156,12 +160,16 @@ class AventureController extends Controller
 
         // Filtre par destination
         if ($destination) {
-            $query->where("destination", "like", "%" . $destination . "%");
+            $query->where("destination", "like", "%" . $destination . "%")
+            ->orderBy("created_at","desc")
+            ;
         }
 
         // Filtre par plage de dates
         if ($date_start && $date_end) {
-            $query->whereBetween("created_at", [$date_start, $date_end]);
+            $query->whereBetween("created_at", [$date_start, $date_end])
+            ->orderBy("created_at","desc")
+            ;
         }
 
         // Paginer les résultats
@@ -172,7 +180,7 @@ class AventureController extends Controller
 
     public function show($user_id)
     {
-        $aventures = Adventure::where('user_id', $user_id)->paginate(10);
+        $aventures = Adventure::where('user_id', $user_id)->orderBy("created_at","desc")->paginate(10);
         return view("aventures.show", compact('aventures'));
     }
 
@@ -185,8 +193,31 @@ class AventureController extends Controller
         ->limit(3)
         ->get();
 
-        return view("dashboard",compact("total","destinations")) ;
+         $user = new UserController() ;
+         $totalActif = $user->totalUsersActif() ;
+
+        return view("dashboard",compact("total","destinations","totalActif")) ;
     }
 
+
+    public function downloadPdf(){
+       // 1. Get the current User
+    $user = Auth::user();
+
+    // 2. Get ONLY this user's adventures (and execute query with get())
+    $aventures = Adventure::where('user_id', $user->id)
+                          ->with('user') // Optional since we already have $user
+                          ->get(); 
+
+    // 3. Load the view
+    // We pass both $aventures AND $user to the view
+    $pdf = Pdf::loadView("aventures.pdf", compact("aventures", "user"));
+
+    // 4. Generate Filename safely
+    // We use $user->name, NOT $aventures->user...
+    $filename = "aventures-user-" . Str::slug($user->name) . ".pdf";
+
+    return $pdf->download($filename);
+    }
    
 }

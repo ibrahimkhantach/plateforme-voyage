@@ -34,7 +34,7 @@
             </label>
         </div>
 
-        <a href="{{ route('register') }}" class="text-white text-left">Not Have Acount?</a>
+        <a href="{{ route('register') }}" class=" dark:text-white text-gray-900 text-left">Not Have Account?</a>
 
 
         <div class="flex items-center justify-end mt-4">
