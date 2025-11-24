@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Str; // To clean the filename
+use Illuminate\Support\Facades\Log;
 
 
 class AventureController extends Controller
@@ -35,37 +36,67 @@ class AventureController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            "title" => "required|string|max:255",
-            "destination" => "required|string|max:255",
-            "details" => "required|string",
-            'images' => 'array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
 
-        $userId = Auth::id();
-        $folderName = 'aventures/' . date('Y-m-d_H-i-s') . '_' . $userId;
 
-        // Créer l'aventure
+public function store(Request $request)
+{
+    // 1. Validate BEFORE starting the transaction. 
+    // If validation fails, Laravel redirects back automatically.
+    $request->validate([
+        "title"       => "required|string|max:255",
+        "destination" => "required|string|max:255",
+        "details"     => "required|string",
+        'images'      => 'array|max:10',
+        'images.*'    => 'image|mimes:jpeg,png,jpg,gif|max:10240',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $user = Auth::user();
+
+        // FIX: You were updating a local variable $isActif, not the user object.
+        if (!$user->isActif) {
+            $user->isActif = true;
+            $user->save();
+        }
+
+        $folderName = 'aventures/' . date('Y-m-d_H-i-s') . '_' . $user->id;
+
+        // Create the Adventure
         $adventure = Adventure::create([
-            "title" => $request->title,
+            "title"       => $request->title,
             "destination" => $request->destination,
-            "details" => $request->details,
-            "images" => $folderName,
-            "user_id" => $userId
+            "details"     => $request->details,
+            "images"      => $folderName, // Storing the folder path
+            "user_id"     => $user->id
         ]);
 
-        // Uploader les images
+        // Handle Image Uploads
         if ($request->hasFile("images")) {
             foreach ($request->file("images") as $image) {
-                $image->store($folderName, "public");
+                // Check if the file is valid before storing
+                if ($image->isValid()) {
+                    $image->store($folderName, "public");
+                } else {
+                    throw new \Exception("One of the files failed to upload.");
+                }
             }
         }
 
+        DB::commit();
         return redirect()->back()->with('success', 'Adventure créée avec succès !');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        // Log the specific error for debugging
+        Log::error("Adventure Store Error: " . $e->getMessage());
+
+        // Return back with the error message so the user sees it nicely
+        return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
     }
+}
 
     /**
      * Display the specified resource.
