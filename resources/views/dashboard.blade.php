@@ -52,7 +52,7 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        Destinations Populaires
+                        Popular Destinations
                     </h3>
                 </div>
                 <div class="p-6">
